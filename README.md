@@ -26,6 +26,7 @@
 - [Wuster](https://github.com/wuster2015):做一个很酷的APP
 - [YangZhe](https://github.com/StudyLifeTime):专攻音视频
 - [Struggle_li](https://github.com/LiPingStruggle): 通往架构师的路上
+- [Milo](https://github.com/hzmeibi):敢冲才不枉青春
 # 如何参与
 
 
