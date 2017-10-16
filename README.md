@@ -30,6 +30,7 @@
 - [Alex_Zhao](https://github.com/zgh0711):努力做一个更有价值的人
 - [Hongleizhang](https://github.com/RayCourant):愿勤奋成为习惯
 - [justdoitJX](https://github.com/justdoitJX):梦为努力浇了水
+- [rookieyang](https://github.com/firstdream10) : 永远相信美好的事情即将发生
 # 如何参与
 
 
