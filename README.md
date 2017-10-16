@@ -23,6 +23,7 @@
 根据贡献内容数量排名：
 
 - [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
+- [Wuster](https://github.com/wuster2015):做一个很酷的APP
 
 # 如何参与
 
