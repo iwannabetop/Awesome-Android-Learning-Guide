@@ -14,7 +14,7 @@
 
 # 贡献者
 
-根据奉献内容数排名：
+根据贡献内容数量排名：
 
 - [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
 
