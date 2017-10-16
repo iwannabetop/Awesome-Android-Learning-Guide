@@ -23,14 +23,33 @@
 根据贡献内容数量排名：
 
 - [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
-- [Wuster](https://github.com/wuster2015):做一个很酷的APP
-- [YangZhe](https://github.com/StudyLifeTime):专攻音视频
-- [Struggle_li](https://github.com/LiPingStruggle): 通往架构师的路上
-- [Milo](https://github.com/hzmeibi):敢冲才不枉青春
-- [Alex_Zhao](https://github.com/zgh0711):努力做一个更有价值的人
-- [Hongleizhang](https://github.com/RayCourant):愿勤奋成为习惯
-- [justdoitJX](https://github.com/justdoitJX):梦为努力浇了水
-- [rookieyang](https://github.com/firstdream10) : 永远相信美好的事情即将发生
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [Wuster](https://github.com/wuster2015)：做一个很酷的APP
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [YangZhe](https://github.com/StudyLifeTime)：专攻音视频
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [Struggle_li](https://github.com/LiPingStruggle)：通往架构师的路上
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [Milo](https://github.com/hzmeibi)：敢冲才不枉青春
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [Alex_Zhao](https://github.com/zgh0711)：努力做一个更有价值的人
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [Hongleizhang](https://github.com/RayCourant)：愿勤奋成为习惯
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [justdoitJX](https://github.com/justdoitJX)：梦为努力浇了水
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+- [rookieyang](https://github.com/firstdream10)：永远相信美好的事情即将发生
+ - 贡献数量：0
+ - 最后一次贡献时间：NAN
+
 # 如何参与
 
 
