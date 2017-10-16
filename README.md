@@ -29,6 +29,7 @@
 - [Milo](https://github.com/hzmeibi):敢冲才不枉青春
 - [Alex_Zhao](https://github.com/zgh0711):努力做一个更有价值的人
 - [Hongleizhang](https://github.com/RayCourant):愿勤奋成为习惯
+- [justdoitJX](https://github.com/justdoitJX):梦为努力浇了水
 # 如何参与
 
 
