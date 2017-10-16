@@ -27,7 +27,7 @@
 - [YangZhe](https://github.com/StudyLifeTime):专攻音视频
 - [Struggle_li](https://github.com/LiPingStruggle): 通往架构师的路上
 - [Milo](https://github.com/hzmeibi):敢冲才不枉青春
-- [Alex_Zhao] (https://github.com/zgh0711):努力做一个更有价值的人
+- [Alex_Zhao](https://github.com/zgh0711):努力做一个更有价值的人
 # 如何参与
 
 
