@@ -5,21 +5,10 @@
 
 努力打造一份系统、全面的安卓开发者进阶指南
 
-# 目的
+# Java 部分
 
-# 内容
-
-
-- [Java 部分](java/README.md)
-
-# 贡献者
-
-根据奉献内容数排名：
-
-- [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
-
-# 如何参与
-
-
-# License
+| 知识点 | 问题 | 审核 | 回答 |
+| --- | --- | --- | --- |
+| 类、内部类、静态内部类、匿名内部类 | shixinzhang | xx | shixinzhang |
+| 泛型 | xx | xx | xx |
 
