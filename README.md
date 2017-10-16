@@ -24,7 +24,7 @@
 
 - [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
 - [Wuster](https://github.com/wuster2015):做一个很酷的APP
-
+- [YangZhe](https://github.com/StudyLifeTime):专攻音视频
 # 如何参与
 
 
