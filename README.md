@@ -25,7 +25,7 @@
 - [shixinzhang](https://github.com/shixinzhang) : 成为更好的人
  - 贡献数量：0
  - 最后一次贡献时间：NAN
-- [Wuster](https://github.com/wuster2015)：做一个很酷的APP
+- [wustor](https://github.com/wustor)：做一个很酷的APP
  - 贡献数量：0
  - 最后一次贡献时间：NAN
 - [YangZhe](https://github.com/StudyLifeTime)：专攻音视频
