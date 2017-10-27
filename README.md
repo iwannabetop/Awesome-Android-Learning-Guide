@@ -41,7 +41,7 @@
 
 
 - [Java 部分](java/README.md) （写作中）
-- 数据结构与算法 （计划中）
+- [数据结构与算法 （内容构思中，欢迎补充）](datastruct/README.md)
 - 并发编程
 - 网络编程
 - Java 虚拟机
