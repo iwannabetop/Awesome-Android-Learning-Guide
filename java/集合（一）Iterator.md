@@ -22,7 +22,7 @@ Java 提供的集合都在 Java.utils 包下，集合主要分两类，Collectio
 >迭代器模式
 >定义：提供一种方法访问一个容器对象中各个元素，而又不暴露该对象的内部细节。
 
-这里我们的重点不是迭代器模式，对“迭代器模式”感兴趣的童鞋可以自行去了解一波。
+这里我们的重点不是迭代器模式，对“[迭代器模式](https://baike.baidu.com/item/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/1355498?fr=aladdin)”感兴趣的童鞋可以自行去了解一波。
 
 先来看看接口 Iterator 的设计。
 
@@ -52,16 +52,16 @@ Java 提供的集合都在 Java.utils 包下，集合主要分两类，Collectio
 - remove（）：删除当前元素，非必须的方法，有需要可重写实现。
 - forEachRemaining（）：给剩下来所有元素做了一个自定义的相同操作。非必须的方法，有需要可重写实现。
 
-#fail-fast 与 ConcurrentModificationException
+# fail-fast 与 ConcurrentModificationException
 
-> fail-fast:是java集合(Collection)中的一种错误机制。当多个线程对同一个集合的内容进行操作时，就可能会产生fail-fast事件。
+> fail-fast:是java集合(Collection)中的一种错误机制。当多个线程对同一个集合的内容进行操作时，就可能会产生fail-fast事件，其实就是 modCount（修改的数组次数） 和 expectedModCount（期望修改的数组次数） 不一致。
 > ConcurrentModificationException：出现 fail-fast 问题的时候就会抛出这个异常。
 
 可能问题描述得有点抽象，我举个例子：假设有个 ArrayList 集合A，A里面包含10个元素，分别是0～9。假设线程a在获取第5个元素的过程中，线程b操作A删除了第一个元素。那么问题来了，此时a线程是获取的到结果是5，但是我的本意应该是取到结果4，此时程序发生了错误，因此产生 fail-fast 问题，遂抛出异常。
 
-###解决方案
-1. 在遍历过程中所有涉及到改变modCount值得地方全部加上synchronized。
-2. 用 CopyOnWriteArrayList，ConcurrentHashMap 替换 ArrayList， HashMap，它们的功能和名字一样，在写入时会创建一个 copy，然后在这个 copy 版本上进行修改操作，这样就不会影响原来的迭代。不过坏处就是浪费内存。
+### 解决方案
+1. 在遍历过程中所有涉及到改变 modCount 值得地方全部加上synchronized。
+2. 用 CopyOnWriteArrayList 替换 ArrayList，它们的功能一样，在写入时会创建一个 copy，然后在这个 copy 版本上进行修改操作，这样就不会影响原来的迭代，不过坏处就是浪费内存。
 
 
 # Iterator 实现迭代功能
