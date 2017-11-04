@@ -10,8 +10,6 @@
 
 ## 深入浅出Java内部类
 
-大家每天都要和Java中的类打交道，大家对于普通的类想必不用多说什么都已经用的滚瓜烂熟，但是提起Java内部类（Inner Class）可能很多就只是听过内部类而已，下面就介绍一下Java中的内部类。
-
 ### 内部类的概念
 
 定义在一个类中或者方法中的类称作为内部类。
@@ -24,29 +22,29 @@
 
 ```java
 class OutClass { // 外部类
-	private int i = 1;
-	public static String str = "outclass";
+    private int i = 1;
+    public static String str = "outclass";
 
-	class InnerClass { // 成员内部类
+    class InnerClass { // 成员内部类
 
-		public void innerMethod() {
-			System.out.println("i=" + i);
-			System.out.println("str=" + str);
+        public void innerMethod() {
+            System.out.println("i=" + i);
+            System.out.println("str=" + str);
 
-		}
-	}
+        }
+    }
 }
 
 public class TestClass {
 
-	public static void main(String[] args) {
-		//先创建外部类对象
-		OutClass outClass = new OutClass(); 
-		//创建内部类对象
-		OutClass.InnerClass in = outClass.new InnerClass();
-		//内部类对象调用自己的方法
-		in.innerMethod();
-	}
+    public static void main(String[] args) {
+        //先创建外部类对象
+        OutClass outClass = new OutClass(); 
+        //创建内部类对象
+        OutClass.InnerClass in = outClass.new InnerClass();
+        //内部类对象调用自己的方法
+        in.innerMethod();
+    }
 } 
 ```
 
@@ -74,23 +72,23 @@ public class TestClass {
 ```java
 public class OutClass {
 
-	{
-		class PartClassOne { // 局部内部类
-			private void method() {
-				System.out.println("PartClassone");
-			}
-		}
-		new PartClassOne().method();
-	}
+    {
+        class PartClassOne { // 局部内部类
+            private void method() {
+                System.out.println("PartClassone");
+            }
+        }
+        new PartClassOne().method();
+    }
 
-	public void testMethod() {
-		class PartClassTwo { // 局部类内部类
-			private void method() {
-				System.out.println("PartClassTwo");
-			}
-		}
-		new PartClassTwo().method();
-	}
+    public void testMethod() {
+        class PartClassTwo { // 局部类内部类
+            private void method() {
+                System.out.println("PartClassTwo");
+            }
+        }
+        new PartClassTwo().method();
+    }
 }
 ```
 
@@ -119,40 +117,144 @@ button.setOnClickListener(new OnClickListener() {
 
 ```java
 public class OutClassThree {
-	private String str = "out";
-	private static String str2 = "static_str";
+    private String str = "out";
+    private static String str2 = "static_str";
 
-	public void print() {
-		System.out.println("outclass:" + str);
-		System.out.println("outclass:" + str2);
-      	//外部类可以直接调用静态内部类的静态属性
-		System.out.println("outclass:" + StaticInnerClass.instr2); 
+    public void print() {
+        System.out.println("outclass:" + str);
+        System.out.println("outclass:" + str2);
+          //外部类可以直接调用静态内部类的静态属性
+        System.out.println("outclass:" + StaticInnerClass.instr2); 
 
-		StaticInnerClass innerClass = new StaticInnerClass();
-		innerClass.print();
-	}
+        StaticInnerClass innerClass = new StaticInnerClass();
+        innerClass.print();
+    }
 
-	public static class StaticInnerClass {
-		private String instr = "out";
-		private static String instr2 = "static_str";
+    public static class StaticInnerClass {
+        private String instr = "out";
+        private static String instr2 = "static_str";
 
-		public void print() {
-			// 静态内部类不能访问外部类的非静态属性和方法
-			// System.out.println("InnerClass:" + OutClassThree.this.str);
-			// 静态内部类可以直接访问外部类的静态属性 外部类.静态属性
-			System.out.println("InnerClass:" + OutClassThree.str2);
-			System.out.println("InnerClass:" + instr2);
-		}
-	}
+        public void print() {
+            // 静态内部类不能访问外部类的非静态属性和方法
+            // System.out.println("InnerClass:" + OutClassThree.this.str);
+            // 静态内部类可以直接访问外部类的静态属性 外部类.静态属性
+            System.out.println("InnerClass:" + OutClassThree.str2);
+            System.out.println("InnerClass:" + instr2);
+        }
+    }
 }
 
 ```
 
-#### 上面这些就是对不同内部类概念的介绍。但是Java中为什么会提供内部类呢？
+#### Java内部类的使用场景
+上面介绍了Java中4种内部类的定义，如果只看玩这些想必大家还是不清楚内部类的应用场景，下面就由我介绍一些内部类的使用的典型场景。
 
-1. 每个内部类都能独立的继承一个接口的实现，所以无论外部类是否已经继承了某个(接口的)实现，对于内部类都没有影响。内部类使得多继承的解决方案变得完整，
-2. 匿名内部类可以方便的实现闭包。
-3. 静态内部类可以带来更好的代码聚合，提高代码可维护性
+##### 一、利用private内部类可以完全禁止其他人依赖类型编码，并可将具体的实现细节完全隐藏。
+在Java中普通类（非内部类)是不可以设为`private`或者`protected`,只能设置成`public` `default`。如果想要一类完全禁止其他人依赖类型编码，就只能使用`private`内部类。
+举个例子：
+在我公司的项目中有一个公共的支付页面，它要支持多种不同的业务，如飞机票、酒店、火车票等。但是每种业务在这个页面又有其特有的信息要展示，我是这样来定义这个页面需要的实体的
+```java
+class PublicPay{
+	int orderId; //公共订单id
+	double price; //订单金额
+	private class FlightPayInfo{
+		String fligtNumber; //航班号
+	}
+	private class HotelPayInfo{
+	String hotelName;//酒店名称
+	}
+	private class TrainPayInfo{
+	String trainCode;//车次
+	}
+}
+```
+我先在`PublicPay`类中定义了所有业务类型都需要的订单id和订单金额，然后又分别定义了三个私有的内部类，他们都拥有自己特有的订单信息。当然你可以说这个三个内部类也可以定义成普通类呀，确实普通类也同样能满足需求，但是我要求的这三个业务的支付信息类只是在这个公共支付信息页面才用到，我想要这几个不同业务的信息类在使用后就进入不可见或不可用的状态，这个时候内部类就能满足我的需求。
+
+##### 二、匿名内部类的使用
+在Android中我们写一个View的点击事件通常是这样写的
+```java
+public class ActivityOne extends AppCompatActivity implements View.OnClickListener{
+    Button mButton1;
+    Button mButton2;
+    Button mButton3;
+    Button mButton4;
+    Button mButton5;
+    Button mButton6;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main2);
+        mButton1 = (Button)findViewById(R.id.btn1);
+		.
+		.
+		.
+		mButton1.setOnClickListener(this);
+		.
+		.
+		.
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btn1:
+                break;
+				 .
+				 .
+				 .
+			 case R.id.btn6:
+				 break;
+        }
+    }
+}
+
+```
+在`onClick()`方法中我们看到了大量的switch语句块，这样的结构不是很好的面向对象设计，我们可以使用内部类作为很好的替代方法
+
+```java
+public class ActivityTwo extends AppCompatActivity {
+    Button mButton1;
+    Button mButton2;
+    Button mButton3;
+    Button mButton4;
+    Button mButton5;
+    Button mButton6;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main2);
+        mButton1 = (Button)findViewById(R.id.btn1);
+        .
+        .
+        .
+
+        
+        mButton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        mButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        .
+        .
+        .
+        mButton6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+}
+```
+这些代码和上面的代码对比，没用使用公共的`onClick()`方法，而是每个button都单独通过匿名内部类设置了自己的点击事件。这可能导致许多内部类。但是，我们可以避免大的switch语句，并有封装逻辑的额外好处。这就是Android中最典型的匿名内部类的使用。
 
 
 
@@ -163,3 +265,5 @@ public class OutClassThree {
 http://blog.csdn.net/qq7342272/article/details/6671433
 
 http://www.cnblogs.com/latter/p/5665015.html
+
+https://www.javaworld.com/article/2077411/core-java/inner-classes.html
