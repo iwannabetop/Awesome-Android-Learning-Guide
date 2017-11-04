@@ -124,8 +124,8 @@ String[] list() ;//返回一个字符串数组，给定路径下的文件或目�
 String[] list(FilenameFilter filter);//返回满足过滤器要求的一个字符串数组
 File[]  listFiles();//返回一个文件对象数组，给定路径下文件或目录
 
-##### 文件过滤
 ```
+##### 文件过滤
 File[] listFiles(FilenameFilter filter);//返回满足过滤器要求的一个文件对象数组
 其中包含了一个重要的接口FileNameFilter，该接口是个文件过滤器，包含了一个accept(File dir,String name)方法，该方法依次对指定File的所有子目录或者文件进行迭代，按照指定条件，进行过滤，过滤出满足条件的所有文件。
 ```
