@@ -15,8 +15,10 @@
 **字符编码**（Character encoding）是一套法则，使用该法则能够对自然语言的字符的一个集合（如字母表或音节表），与其他东西的一个集合进行配对。各个国家和地区所制定的不同 ANSI 编码标准中，都只规定了各自语言所需的字符。
 #### 常见的编码方式
 **ASCII编码**：美国制定了一套字符编码，对英语字符与二进制位之间的关系，做了统一规定。这被称为 ASCII 码，一直沿用至今。
-**非 ASCII 编码**：英语用128个符号编码就够了，但是用来表示其他语言，128个符号是不够的，所以在别的国家编码符号会比128要多，所以问题就出现了，不同的国家有不同的字母，因此，哪怕它们都使用256个符号的编码方式，代表的字母却不一样。
-**UTF-8编码**：UTF-8 最大的一个特点，就是它是一种变长的编码方式。它可以使用1~4个字节表示一个符号，根据不同的符号而变化字节长度。。UTF-8 就是在互联网上使用最广的一种 Unicode 的实现方式。其他实现方式还包括 UTF-16（字符用两个字节或四个字节表示）和 UTF-32（字符用四个字节表示），不过在互联网上基本不用。重复一遍，这里的关系是，UTF-8 是 Unicode 的实现方式之一。
+
+**非ASCII 编码**：英语用128个符号编码就够了，但是用来表示其他语言，128个符号是不够的，所以在别的国家编码符号会比128要多，所以问题就出现了，不同的国家有不同的字母，因此，哪怕它们都使用256个符号的编码方式，代表的字母却不一样。
+
+**UTF-8编码**：UTF-8最大的一个特点，就是它是一种变长的编码方式。它可以使用1~4个字节表示一个符号，根据不同的符号而变化字节长度。。UTF-8 就是在互联网上使用最广的一种 Unicode 的实现方式。其他实现方式还包括 UTF-16（字符用两个字节或四个字节表示）和 UTF-32（字符用四个字节表示），不过在互联网上基本不用。重复一遍，这里的关系是，UTF-8 是 Unicode 的实现方式之一。
 
 ### 联系与区别
 很多时候我们经常提及到字符跟字节之间的关系，这个问题的前提是基于某一种编程语言比如说Java或者C来说的，因为字符跟字节之间的关系跟字符编码是有着紧密联系的，所以单独讨论字符跟字节之间的关系没有意义，下面简单来看一下他们在不同编码上的的对应关系：
@@ -173,23 +175,25 @@ file目录下的所有子文件如果满足后缀是.apk的条件的文件都会
 >当使用处理流进行输入/输出时，程序并不会直接连接到实际的数据源，没有和实际的输入/输出节点连接。使用处理流的一个明显好处是，只要使用相同的处理流，程序就可以采用完全相同的输入/输出代码来访问不同的数据源，随着处理流所包装节点流的变化，程序实际所访问的数据源也相应地发生变化。
 
 **常用的节点流**
-父　类 ：InputStream 、OutputStream、 Reader、 Writer
-文　件 ：FileInputStream 、 FileOutputStrean 、FileReader 、FileWriter 文件进行处理的节点流
-数　组 ：ByteArrayInputStream、 ByteArrayOutputStream、 CharArrayReader 、CharArrayWriter 对数组进行处理的节点流（对应的不再是文件，而是内存中的一个数组）
-字符串 ：StringReader、 StringWriter 对字符串进行处理的节点流
-管　道 ：PipedInputStream 、PipedOutputStream 、PipedReader 、PipedWriter 对管道进行处理的节点流
 
-ByteArrayOutputStream、FileOutputStream 是两种基本的介质流，它们分别向Byte 数组、和本地文件中写入数据。
+**父类** ：InputStream 、OutputStream、 Reader、 Writer
+
+**文件** ：FileInputStream 、 FileOutputStrean 、FileReader 、FileWriter 文件进行处理的节点流
+
+**数组**：ByteArrayInputStream、 ByteArrayOutputStream、 CharArrayReader 、CharArrayWriter 对数组进行处理的节点流（对应的不再是文件，而是内存中的一个数组）
+
+**字符串** ：StringReader、 StringWriter 对字符串进行处理的节点流
+
+**管　道** ：PipedInputStream 、PipedOutputStream 、PipedReader 、PipedWriter 对管道进行处理的节点流ByteArrayOutputStream、FileOutputStream 是两种基本的介质流，它们分别向Byte 数组、和本地文件中写入数据。
 PipedOutputStream 是向与其它线程共用的管道中写入数据。
-ObjectOutputStream 和所有FilterOutputStream 的子类都是装饰流。
+ObjectOutputStream和所有FilterOutputStream 的子类都是装饰流。
 
 **常用的处理流**
-缓冲流：BufferedInputStrean 、BufferedOutputStream、 BufferedReader、 BufferedWriter 增加缓冲功能，避免频繁读写硬盘。
-转换流：InputStreamReader 、OutputStreamReader实现字节流和字符流之间的转换。
-数据流： DataInputStream 、DataOutputStream 等-提供将基础数据类型写入到文件中，或者读取出来。
-转换流
+**缓冲流**：BufferedInputStrean 、BufferedOutputStream、 BufferedReader、 BufferedWriter 增加缓冲功能，避免频繁读写硬盘。
+**转换流**：InputStreamReader 、OutputStreamReader实现字节流和字符流之间的转换。
+**数据流**： DataInputStream 、DataOutputStream 等-提供将基础数据类型写入到文件中，或者读取出来。
 
-InputStreamReader 、OutputStreamWriter 要InputStream或OutputStream作为参数，实现从字节流到字符流的转换。
+**转换流**：InputStreamReader 、OutputStreamWriter 要InputStream或OutputStream作为参数，实现从字节流到字符流的转换。
 
 ### 父类介绍
 
@@ -317,6 +321,7 @@ Java NIO是java 1.4之后新出的一套IO接口，这里的的新是相对于�
 选择器类Selector并没有和通道有直接的关系，而是通过叫选择键的对象SelectionKey来联系的,而且Selector可以注册过个key，也就是说可以同时管理多个通道。选择键代表了通道与选择 器之间的一种注册关系，channel()和selector()方法分别返回注册的通道与选择器。
 
 **工作原理**
+
 NIO调用不会被阻塞，在IO开始的时候需要在分发器那里注册感兴趣的事件，并提供相应的处理者（event handler)，或者是回调函数；事件分发器在适当的时候，会将请求的事件分发给这些handler或者回调函数：如可读数据到达，新的套接字连接等等，在发生特定事件时，系统再通知我们。NIO中实现非阻塞I/O的核心对象就是Selector，Selector就是注册各种I/O事件地 方，而且当那些事件发生时，就是这个对象告诉我们所发生的事件，如下图所示：
 ![NIO工作原理](http://orbm62bsw.bkt.clouddn.com/NIO%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png)
 >从图中可以看出，当有读或写等任何注册的事件发生时，可以从Selector中获得相应的SelectionKey，同时从 SelectionKey中可以找到发生的事件和该事件所发生的具体的SelectableChannel，以获得客户端发送过来的数据。
@@ -330,7 +335,9 @@ NIO的优势在于**单线程管理多个连接**，可以在线程数较少的�
 **装饰者(Decorator)模式**：动态将职责附加到对象上，若要扩展功能，装饰者提供了比继承更具弹性的代替方案。
 **设计原则**：开闭原则(一个软件实体如类、模块和函数应该对扩展开放，对修改关闭)。
 下面用图简单描述一下：
-![装饰者模式图解]](http://orbm62bsw.bkt.clouddn.com/%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F%E6%96%B0.png)
+
+
+![装饰者模式图解](http://orbm62bsw.bkt.clouddn.com/%E8%A3%85%E9%A5%B0%E8%80%85%E6%A8%A1%E5%BC%8F%E6%96%B0.png)
 
 下面解释一下这几个变量：
 - Component：抽象组件
@@ -439,6 +446,7 @@ data文件夹就是我们常说的内部存储，对于没有root的手机来说
 
 #### 路径获取
 两种存储方式都是通过Context类来进行获取的
+
 **内部存储**：
    ```
       getFilesDir();//获取内部存储的File路径
