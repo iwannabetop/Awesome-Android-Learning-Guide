@@ -1,101 +1,96 @@
-# String源码分析
 
 ## 概述
-![String继承体系](http://orbm62bsw.bkt.clouddn.com/String%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
+在分析String的源码之前，打算先介绍一点关于JVM的内存分布，这样有助于我们更好地去理解String的设计：
+![JVM内存模型](http://orbm62bsw.bkt.clouddn.com/JVM.jpg)
 
-String是一个final类，并且实现了CharSequence,Comparable以及Serializable接口
-对于Android开发者而言，这无疑是一个经常使用的类，所以需要好好了解一下他的原理，先看一下文档中的注释。
-- Strings are constant; their values can not be changed after they are created.
-Stringbuffers support mutable strings.Because String objects are immutable they can be shared. Forexample:
-- String 字符串是常量，其值在实例创建后就不能被修改，但字符串缓冲区支持可变的字符串，因为缓冲区里面的不可变字符串对象们可以被共享（其实就是使对象的引用发生了改变）。
+**Method Area**：方法区，当虚拟机装载一个class文件时，它会从这个class文件包含的二进制数据中解析类型信息，然后把这些类型信息（包括类信息、常量、静态变量等）放到方法区中，该内存区域被所有线程共享，本地方法区存在一块特殊的内存区域，叫**常量池**（Constant Pool）。
+**Heap**：堆是Java虚拟机所管理的内存中最大的一块。Java堆是被所有线程共享的一块内存区域，Java中的。
+**Stack**：栈，又叫堆栈或者虚拟机栈。JVM为每个新创建的线程都分配一个栈。也就是说,对于一个Java程序来说，它的运行就是通过对栈的操作来完成的。栈以帧为单位保存线程的状态。JVM对栈只进行两种操作：以帧为单位的压栈和出栈操作。我们知道,某个线程正在执行的方法称为此线程的当前方法。
+**Program Count Register**：程序计数器，又叫程序寄存器。JVM支持多个线程同时运行，当每一个新线程被创建时，它都将得到它自己的PC寄存器（程序计数器）。如果线程正在执行的是一个Java方法（非native），那么PC寄存器的值将总是指向下一条将被执行的指令，如果方法是 native的，程序计数器寄存器的值不会被定义。 JVM的程序计数器寄存器的宽度足够保证可以持有一个返回地址或者native的指针。
+**Native Stack**：本地方法栈，存储本地方方法的调用状态。
 
-面试中经常会被问到，为什么String要被设计成final的，很多时候会去刻意地去记一些面试题，去不大愿意去看源码，其实看一下注释，就都明白了。
+常量池(constant pool)指的是在编译期被确定，并被保存在已编译的.class文件中的一些数据。它包括了关于类、方法、接口等中的常量，也包括字符串常量。Java把内存分为堆内存跟栈内存，前者主要用来存放对象，后者用于存放基本类型变量以及对象的引用。
+
 
 ## 正文
 
+### 继承关系
+先看一下文档中的注释。
+- Strings are constant; their values can not be changed after they are created.
+Stringbuffers support mutable strings.Because String objects are immutable they can be shared. Forexample:
+- String 字符串是常量，其值在实例创建后就不能被修改，但字符串缓冲区支持可变的字符串，因为缓冲区里面的不可变字符串对象们可以被共。
+
+![String继承体系](http://orbm62bsw.bkt.clouddn.com/String%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
+
+通过注释跟继承关系，我们知道String被final修饰，而且一旦创建就不能更改，并且实现了CharSequence,Comparable以及Serializable接口。
+
+#### final：
+- **修饰类**:当用final修饰一个类时，表明这个类不能被继承。也就是说，String类是不能被继承的，
+- **修饰方法**：把方法锁定，以防任何继承类修改它的含义。
+- **修饰变量**：修饰基本数据类型变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。
+
+String类通过final修饰，不可被继承，同时String底层的字符数组也是被final修饰的，char属于基本数据类型，一旦被赋值之后也是不能被修改的，所以String是不可变的。
+
+#### CharSequence
+CharSequence翻译过来就是字符串，String我们平常也是叫作字符串，但是前者是一个接口，下面看一下接口里面的方法：
+```
+    int length();
+    char charAt(int index);
+    CharSequence subSequence(int start, int end);
+    public String toString();
+    }
+```
+方法很少，并没有看到我们常见的String的方法，这个类应该只是一个通用的接口，那么翻一翻它的实现类
+![CharSequence实现类](http://orbm62bsw.bkt.clouddn.com/CharSequence%E5%AE%9E%E7%8E%B0%E7%B1%BB.png)
+CharSequence的实现类里面出现了我们很常见的StringBuilder跟StringBuffer,先放一放，一会儿再去研究他们俩。
+
 ### 成员变量
 ```
-/**
-The value isused for character storage.
-*/
-private final char value[];
-这是一个字符数组，并且是 final 类型，用于存储字符串内容。从 fianl 关键字可以看出，String 的内容一旦被初始化后，其不能被修改的。
-
-看到这里也许会有人疑惑，String 初始化以后好像可以被修改啊。比如找一个常见的例子：
-String str = “hello”;     str = “hi”
-其实这里的赋值并不是对 str 内容的修改，而是将str指向了新的字符串。另外可以明确的一点：String 其实是基于字符数组 char[] 实现的。
-/**
-Cache the hashcode for the string
-*/
-private int hash;  //Default to 0
-缓存字符串的 hash Code，其默认值为 0
+private final char value[];//final字符数组，一旦赋值，不可更改
+private int hash;  //缓存String的 hash Code，默认值为 0
+private static final ObjectStreamField[] serialPersistentFields =new ObjectStreamField[0];//存储对象的序列化信息
 ```
 
-
 ### 构造方法
-#### 空的构造方法
 
+#### 空参数初始化
 ```
  public String(){
   this.value = "".value;
 }
+//将数组的值初始化为空串，此时在栈内存中创建了一个引用，在堆内存中创建了一个对象
+//示例代码
+String str = new String()
+str = "hello";
 ```
 
-该构造方法会创建空的字符序列，注意这个构造方法的使用，因为创造不必要的字符串对象是不可变的。因此不建议采取下面的创建 String 对象:
-```
-String str = new String()
-str = "sample";
-```
-这样的结果显而易见，会产生了不必要的对象。
-#### 使用字符串类型的对象来初始化
+- 1.先创建了一个空的String对象
+- 2.接着又在常量池中创建了一个"hello",并赋值给第二个String
+- 3.将第二个String的引用传递给第一个String
+
+这种方式实际上创建了两个对象
+
+#### String初始化
 ```
 public String(String original){
   this.value = original.value;
   this.hash = original.hash;
 }
+//代码示例
+String str=new String("hello")
 ```
-这里将直接将源 String 中的 value 和 hash 两个属性直接赋值给目标 String。因为 String 一旦定义之后是不可以改变的，所以也就不用担心改变源
-String 的值会影响到目标 String 的值。
+创建了一个对象
 
-#### 使用字符数组来构造
+#### 字符数组初始化
 ```
 public String(char value[]){
+//将传过来的char拷贝至value数组里面
     this.value = Arrays.copyOf(value, value.length);
 }
-public String(char value[], int offset, int count){
-  if(offset<0){
-    throw new StringIndexOutOfBoundsException(offset);
-  }
-  if(count<=0){
-    if(count<0){
-     throw new String IndexOutOfBoundsException(count);
-    }
-    if(offset <= value.length){
-      this.value = "".value;
-      return;
-    }
-  }
-
- //Note:offset or count might be near-1>>>1.
-  if(offset > value.length - count){
-      throw new StringIndexOutOfBoundsException(offset+count);
-  }
- this.value=Arrays.copyOfRange(value,offset,offset+count);
-}
 ```
+#### 字节数组初始化
 
-这里值得注意的是：当我们使用字符数组创建
-String 的时候，会用到 Arrays.copyOf 方法或
-Arrays.copyOfRange 方法。这两个方法是将原有的字符数组中的内容逐一的复制到String中的字符数组中。会创建一个新的字符串对象，随后修改的字符数组不影响新创建的字符串。
-#### 使用字节数组来构建 String 
-在 Java 中，String 实例中保存有一个 char[] 字符数组，char[] 字符数组是以 unicode 码来存储的，String 和 char 为内存形式。
-byte 是网络传输或存储的序列化形式，所以在很多传输和存储的过程中需要将 byte[] 数组和String进行相互转化。所以，String 提供了一系列重载的构造方法来将一个字符数组转化成 String，提到 byte[] 和 String 之间的相互转换就不得不关注编码问题。
-String(byte[] bytes, Charset charset)
-该构造方法是指通过 charset 来解码指定的 byte 数组，将其解码成 unicode 的 char[] 数组，够造成新的 String。
-这里的 bytes 字节流是使用 charset 进行编码的，想要将他转换成 unicode 的 char[] 数组，而又保证不出现乱码，那就要指定其解码方式**
-
-同样使用字节数组来构造 String 也有很多种形式，按照是否指定解码方式分的话可以分为两种：
-
+**不指定编码**
 ```
 public String(byte bytes[]){
   this(bytes, 0, bytes.length);
@@ -104,22 +99,7 @@ public String(byte bytes[], int offset, int length){
   checkBounds(bytes, offset, length);
     this.value = StringCoding.decode(bytes, offset, length);
 }
-```
-如果我们在使用 byte[] 构造 String 的时候，使用的是下面这四种构造方法(带有 charsetName 或者
-charset 参数)的一种的话，那么就会使用
-StringCoding.decode 方法进行解码，使用的解码的字符集就是我们指定的 charsetName 或者charset 。
-```
-String(byte bytes[])
-String(byte bytes[], int offset, int length)
-String(byte bytes[], Charset charset)
-String(byte bytes[], String charsetName)
-String(byte bytes[], int offset, int length, Charset charset)
-String(byte bytes[], int offset, int length, String charsetName)
-```
 
-我们在使用 byte[] 构造 String 的时候，如果没有指明解码使用的字符集的话，那么 StringCoding 的 decode 方法首先调用系统的默认编码格式，如果没有指定编码格式则默认使用 ISO-8859-1 编码格式进行编码操作。主要体现代码如下：
-
-```
 static char[] decode(byte[] ba, int off, int len){
     String csn = Charset.defaultCharset().name();
   try{ //use char set name decode() variant which provide scaching.
@@ -128,16 +108,22 @@ static char[] decode(byte[] ba, int off, int len){
    warnUnsupportedCharset(csn);
   }
   try{
+  //默认使用 ISO-8859-1 编码格式进行编码操作
     return decode("ISO-8859-1", ba, off, len);  } catch(UnsupportedEncodingException x){
-    //If this code is hit during VM initiali zation, MessageUtils is the only way we will be able to get any kind of error message.
-    MessageUtils.err("ISO-8859-1 char set not available: " + x.toString());
-    // If we can not find ISO-8859-1 (are quired encoding) then things are seriously wrong with the installation.
-    System.exit(1);
-    return null;
-  }
-}
+    //异常捕获}
 ```
-#### 通过 StringBuffer 和 StringBuider构造
+**指定编码**
+```
+String(byte bytes[], Charset charset)
+String(byte bytes[], String charsetName)
+String(byte bytes[], int offset, int length, Charset charset)
+String(byte bytes[], int offset, int length, String charsetName)
+```
+
+byte 是网络传输或存储的序列化形式，所以在很多传输和存储的过程中需要将 byte[] 数组和String进行相互转化，byte是字节，char是字符，字节流跟字符流之间转化肯定需要指定编码，不然很可能会出现乱码， bytes 字节流是使用 charset 进行编码的，想要将他转换成 unicode 的 char[] 数组，而又保证不出现乱码，那就要指定其解码方式
+
+
+#### 通过"SB"构造
 ···
 public String(StringBuffer buffer) {
     synchronized(buffer) {
@@ -148,472 +134,247 @@ public String(StringBuilder builder) {
      this.value = Arrays.copyOf(builder.getValue(), builder.length());
 }
 ···
-当然，这两个构造方法是很少用到的，因为当我们有了 StringBuffer 或者 StringBuilfer 对象之后可以直接使用他们的 toString 方法来得到 String。
-关于效率问题，Java 的官方文档有提到说使用StringBuilder 的 toString 方法会更快一些，原因是
-StringBuffer 的 toString 方法是 synchronized 的，在牺牲了效率的情况下保证了线程安全。
-StringBuilder 的 toString() 方法：
+很多时候我们不会这么去构造，因为StringBuilder跟StringBuffer有toString方法，如果不考虑线程安全，优先选择StringBuilder。
+
+#### equals方法
 ```
-@Override
-public String toString(){
-  //Create a copy, don't share the array
-  return new String(value,0,count);
-}
-StringBuffer 的 toString() 方法：
-
-@Override
-public synchronized String toString(){
-  if (toStringCache == null){
-    toStringCache = Arrays.copyOfRange(value, 0, count);
-  }
-  return new String(toStringCache, true);
-}
-```
-一个特殊的保护类型的构造方法
-String 除了提供了很多公有的供程序员使用的构造方法以外，还提供了一个保护类型的构造方法（Java 7），我们看一下他是怎么样的：
-
-```
-String(char[] value, boolean share) {
- // assert share : "unshared not supported";
- this.value = value;
-}
-```
-从代码中我们可以看出，该方法和 String(char[] value) 有两点区别：
-
-第一个，该方法多了一个参数：boolean share，其实这个参数在方法体中根本没被使用。注释说目前不支持 false，只使用 true。
-那可以断定，加入这个 share 的只是为了区分于 String(char[] value) 方法，不加这个参数就没办法定义这个函数，只有参数是不能才能进行重载。
-第二个区别就是具体的方法实现不同。我们前面提到过，String(char[] value) 方法在创建 String 的时候会用到 Arrays 的 copyOf 方法将value中的内容逐一复制到 String当中，而这个 String(char[] value, boolean share) 方法则是直接将value的引用赋值给String的value。
-那么也就是说，这个方法构造出来的 String 和参数传过来的 char[] value 共享同一个数组。
-为什么 Java 会提供这样一个方法呢？
-
-- 性能好：这个很简单，一个是直接给数组赋值（相当于直接将 String 的 value 的指针指向char[]数组），一个是逐一拷贝。当然是直接赋值快了。
-- 节约内存：该方法之所以设置为 protected，是因为一旦该方法设置为公有，在外面可以访问的话，如果构造方法没有对 arr 进行拷贝，那么其他人就可以在字符串外部修改该数组，由于它们引用的是同一个数组，因此对 arr 的修改就相当于修改了字符串，那就破坏了字符串的不可变性。
-- 安全的：对于调用他的方法来说，由于无论是原字符串还是新字符串，其 value 数组本身都是 String 对象的私有属性，从外部是无法访问的，因此对两个字符串来说都很安全。
-
-#### 其他方法
-
-length() 
-
-```
-public int length(){
-  return value.length;
-}
-```
-
- isEmpty() 
-
-public boolean isEmpty(){
-  return value.length == 0;
-}
-
-charAt(int index) 
-
-```
-public char charAt(int index){
-  if((index < 0) || (index >= value.length)){
-    throw new StringIndexOutOfBoundsException(index);
-  }
-  return value[index];
-}
-```
-char[] toCharArray() 
-
-trim() 
-
-toUpperCase() 
-
-toLowerCase() 
-
-···
-
-
-比较方法
-
-
-```
-boolean equals(Object anObject)；
-
-boolean contentEquals(String Buffersb)；
-
-boolean contentEquals(Char Sequencecs)；
-
-boolean equalsIgnoreCase(String anotherString)；
-
-int compareTo(String anotherString)；
-
-int compareToIgnoreCase(String str)；
-
-boolean regionMatches(int toffset, String other, int ooffset, int len) //局部匹配
-
-boolean regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) //局部匹配
-```
-字符串有一系列方法用于比较两个字符串的关系。 前四个返回 boolean 的方法很容易理解，前三个比较就是比较 String 和要比较的目标对象的字符数组的内容，一样就返回true, 不一样就返回false，核心代码如下：
-
-```
-int n = value.length; 
-while (n-- ! = 0) {
-   if (v1[i] != v2[i])
-     return false;
-     i++;
- }
-```
-v1 v2 分别代表 String 的字符数组和目标对象的字符数组。 第四个和前三个唯一的区别就是他会将两个字符数组的内容都使用 toUpperCase 方法转换成大写再进行比较，以此来忽略大小写进行比较。相同则返回 true，不想同则返回 false
-
-equals方法：
-
-
-```
-public boolean equals(Object anObject) {
-     if (this == anObject) {
-         return true;
-     } 
-    if (anObject instanceof String) {
-       String anotherString = (String) anObject;
-       int n = value.length;
-       if (n == anotherString.value.length) {
-           char v1[] = value;
-           char v2[] = anotherString.value;
-           int i = 0;
-           while (n-- != 0) {
-             if (v1[i] != v2[i])
-             return false;
-             i++;
-           }
-           return true;
-       }
-   } 
-   return false;
-}
-```
-
-该方法首先判断this == anObject ，也就是说判断要比较的对象和当前对象是不是同一个对象，如果是直接返回 true，如不是再继续比较，然后在判断
-anObject 是不是 String
-类型的，如果不是，直接返回 false，如果是再继续比较，到了能终于比较字符数组的时候，他还是先比较了两个数组的长度，不一样直接返回 false，一样再逐一比较值。 
-
-contentEquals 有两个重载:
-
-StringBuffer 需要考虑线程安全问题，加锁之后再调用 
-
-contentEquals((CharSequence) sb) 方法。
-
-contentEquals((CharSequence) sb) 则分两种情况，一种是 cs instanceof 
-AbstractStringBuilder，另外一种是参数是 String
-类型。具体比较方式几乎和 equals 方法类似，先做“宏观”比较，在做“微观”比较。
-
-下面这个是equalsIgnoreCase代码的实现：
-
-```
- public boolean equalsIgnoreCase(String anotherString) {
- return (this == anotherString) ? true : (anotherString != null) && (anotherString.value.length == value.length) && regionMatches(true, 0, anotherString, 0, value.length);
- }
-```
-
-看到这段代码，眼前为之一亮。使用一个三目运算符和&&操作代替了多个 if 语句。
-
-hashCode
-
-
-```
-public int hashCode(){
-  int h = hash;
-  if(h == 0 && value.length > 0){
-    char val[] = value;
-    for(int i = 0; i < value.length; i++){
-      h = 31 * h + val[i];
+  public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof String) {
+            String anotherString = (String)anObject;
+            int n = value.length;
+            if (n == anotherString.value.length) {
+                char v1[] = value;
+                char v2[] = anotherString.value;
+                int i = 0;
+                while (n-- != 0) {
+                    if (v1[i] != v2[i])
+                        return false;
+                    i++;
+                }
+                return true;
+            }
+        }
+        return false;
     }
-    hash = h;
-  }
-  return h;
-}
 ```
+- 1.先判断两个对象的地址是否相等
+- 2. 再判断是否是String类型
+- 3.如果都是String类型，就先比较长度是否相等，然后在比较值
 
-hashCode 的实现其实就是使用数学公式：s[0]31^(n-1) + s[1]31^(n-2) + ... + s[n-1]
-所谓“冲突”，就是在存储数据计算hash地址的时候，我们希望尽量减少有同样的hash地址。如果使用相同 hash 地址的数据过多，那么这些数据所组成的 hash 链就更长，从而降低了查询效率。
-所以在选择系数的时候要选择尽量长的系数并且让乘法尽量不要溢出的系数，因为如果计算出来的
-hash 地址越大，所谓的“冲突”就越少，查找起来效率也会提高。
+#### hashcode方法
+```
+    public int hashCode() {
+        int h = hash;
+        if (h == 0 && value.length > 0) {
+            char val[] = value;
 
+            for (int i = 0; i < value.length; i++) {
+                h = 31 * h + val[i];
+            }
+            hash = h;
+        }
+        return h;
+    }
+```
+- 1.如果String的length==0或者hash值为0，则直接返回0
+- 2.上述条件不满足，则通过算法s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]计算hash值
+我们知道，hash值很多时候用来判断两个对象的值是否相等，所以需要尽可能保证唯一性，前面在分析HashMap原理的时候曾经提到过，冲突越少查询的效率也就越高。
+
+#### intern方法
+```
+ public native String intern();
+```
+   -  Returns a canonical representation for the string object.  A pool of strings, initially empty, is maintained privately by the class .  When the intern method is invoked, if the pool already contains a string equal to this object as determined by  the  method, then the string from the pool is  returned. Otherwise, this  object is added to the pool and a reference to this object is returned.  It follows that for any two strings { s} and { t},  { s.intern() == t.intern()} is { true}if and only if {s.equals(t)} is { true}.
+   -  返回一个当前String的一个固定表示形式。String的常量池，初始化为空，被当前类维护。当此方法被调用的时候，如果常量池中包含有跟当前String值相等的常量，这个常量就会被返回。否则，当前string的值就会被加入常量池，然后返回当前String的引用。如果两个String的intern()调用==时返回true,那么equals方法也是true.
+
+翻译完了，其实就是一句话，如果常量池中有当前String的值，就返回这个值，如果没有就加进去，返回这个值的引用，看起来很厉害的样子。
 
 
 #### String对“+”的重载
 
-我们知道，Java是不支持重载运算符，String的“+”是java中唯一的一个重载运算符，那么java使如何实现这个加号的呢？我们先看一段代码：
-
+我们知道，"+"跟"+="是Java中仅有的两个重载操作符，除此之外，Java不支持其它的任何重载操作符，下面通过反编译来看一下Java是如何进行重载的：
 
 ```
 public static void main(String[] args) {
-     String string="hollis";
-     String string2 = string + "chuang";
+     String str1="wustor";
+     String str2= str1+ "Android";
 }
 ```
+反编译Main.java，执行命令 javap -c Main，输出结果
+![反编译Main文件](http://orbm62bsw.bkt.clouddn.com/%E5%8F%8D%E7%BC%96%E8%AF%91Main%E6%96%87%E4%BB%B6.png)
 
-然后我们将这段代码的实际执行情况：
+可能看不懂所有的代码，但是我们看到了StringBuilder,然后看到了wustor跟Android，以及调用了StringBuilder的append方法。既然编译器已经在底层为我们进行优化，那么为什么还要提倡我们有StringBuilder呢？
+我们仔细观察一下上面的第三行代码，new 了一个StringBuilder对象，如果有是在一个循环里面，我们使用"+"号进行重载的话就会创建多个StringBuilder的对象，而且，即时编译器都帮我们优化了，但是编译器事先是不知道我们StringBuilder的长度的，并不能事先分配好缓冲区，也会加大内存的开销，而且使用重载的时候根据java的内存分配也会创建多个对象，那么为什么要使用StringBuilder呢，我们稍后会分析。
 
+#### switch
+
+![String的Switch原理](http://orbm62bsw.bkt.clouddn.com/switch%E8%AF%AD%E5%8F%A5.png)
+- 1.首先调用String的HashCode方法,拿到相应的Code
+- 2.通过这个code然后给每个case唯一的标识
+- 3.通过标识来执行相应的操作
+
+我觉得挺好奇，所以接着查看一下如果是char类型的看看switch是怎么转换的
 ```
-public static void main(String args[]){
-     String string = "hollis";
-     String string2 = (new         
-     StringBuilder(String.valueOf(string))).append("chuang").toString();
-}
-```
-
-看了反编译之后的代码我们发现，其实String对“+”的支持其实就是使用了StringBuilder以及他的append、toString两个方法。
-
-String.valueOf和Integer.toString的区别
-接下来我们看以下这段代码，我们有三种方式将一个int类型的变量变成呢过String类型，那么他们有什么区别？
-
-int i = 5;
-
-String i1 = "" + i;
-
-String i2 = String.valueOf(i);
-
-String i3 = Integer.toString(i);
-
-第三行和第四行没有任何区别，因为String.valueOf(i)也是调用Integer.toString(i)来实现的。
-第二行代码其实是String i1 = (new StringBuilder()).append(i).toString();
-
-首先创建了一个StringBuilder对象，然后再调用append方法，再调用toString方法。
-switch对字符串支持的实现
-
-还是先上代码：
-
-```
-public class switchDemoString {
-     public static void main(String[] args) {
-         String str = "world";
-         switch (str) {
-         case "hello": 
-              System.out.println("hello");
-              break;
-         case "world":
-             System.out.println("world");
-             break;
-         default: break;
-       }
+    public static void main(String[] args) {
+        char ch = 'a';
+        switch (ch) {
+            case 'a':
+                System.out.println("hello");
+                break;
+            case 'b':
+                System.out.println("world");
+                break;
+            default:
+                break;
+        }
     }
-}
 ```
+![Char的Switch语句](http://orbm62bsw.bkt.clouddn.com/Char%E7%9A%84switch%E8%AF%AD%E5%8F%A5.png)
 
-对编译后的代码进行反编译：
+基本上跟String差不多，就不多解释了，由此可以看出，Java对String的Switch支持实际上也还是对int类型的支持。
 
 
-```
-public static void main(String args[]) {
-       String str = "world";
-       String s;
-       switch((s = str).hashCode()) {
-          case 99162322:
-               if(s.equals("hello"))
-                   System.out.println("hello");
-               break;
-          case 113318802:
-               if(s.equals("world"))
-                   System.out.println("world");
-               break;
-          default: break;
-       }
-  }
-```
+### StringBuilder
+由于String对象是不可变的，所以在重载的时候会创建多个对象，而StringBuilder对象是可变的，可以直接使用append方法来进行拼接，下面看看StringBuilder的拼接。
 
-看到这个代码，你知道原来字符串的switch是通过equals()和hashCode()方法来实现的。记住，switch中只能使用整型，比如byte，short，char(ackii码是整型)以及int。其实swich只支持一种数据类型，那就是整型，其他数据类型都是转换成整型之后在使用switch的。
-
-### StringBuffer
-我们在上面说String对象是不可变的，而StringBuffer 对象是可变的，大家都说在能大体了解字符串的长度的情况下创建StringBuffer对象时 指定其容量，在上面的string中我们也知道使用“+”号的时候我们也是调用了append方法。
-
-![StringBuffer继承关系](http://orbm62bsw.bkt.clouddn.com/StringBuffer%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
+![StringBuilder继承关系](http://orbm62bsw.bkt.clouddn.com/StringBuilder%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
 
 
 ```
-public final class StringBuffer  extends AbstractStringBuilder
+public final class StringBuilder extends AbstractStringBuilder
     implements java.io.Serializable, CharSequence
 {
 
-    /** use serialVersionUID from JDK 1.0.2 for interoperability */
-    static final long serialVersionUID = 3388685877147921107L;
-
-    /**
-     * Constructs a string buffer with no characters in it and an
-     * initial capacity of 16 characters.
-     */
-
-     //  默认为16个字符
-    public StringBuffer() {
+     // 空的构造方法
+    public StringBuilder () {
         super(16);
     }
-
-    /**
-     * Constructs a string buffer with no characters in it and
-     * the specified initial capacity.
-     *
-     * @param      capacity  the initial capacity.
-     * @exception  NegativeArraySizeException  if the <code>capacity</code>
-     *               argument is less than <code>0</code>.
-     */
+	//给予一个初始化容量
     public StringBuffer(int capacity) {
         super(capacity);
     }
-
-    /**
-     * Constructs a string buffer initialized to the contents of the
-     * specified string. The initial capacity of the string buffer is
-     * <code>16</code> plus the length of the string argument.
-     *
-     * @param   str   the initial contents of the buffer.
-     * @exception NullPointerException if <code>str</code> is <code>null</code>
-     */
+	//使用String进行创建
     public StringBuffer(String str) {
         super(str.length() + 16);
         append(str);
     }
-
-```
-StringBuffer 类继承自AbstractStringBuilder那在看看AbstractStringBuilder的源码
-
-```
-abstract class AbstractStringBuilder implements Appendable, CharSequence {
-    /**
-     * The value is used for character storage.
-     */
-      // 这里我们看到，这个数组没有被final 修饰，所以引用变量的值可以改变，
-       //可以引用到其他数组对象
-     char[] value;
-
-    /**
-     * The count is the number of characters used.
-     */
-   //  记录字符的个数
-   int count;
-
-    /**
-     * This no-arg constructor is necessary for serialization of subclasses.
-     */
-    AbstractStringBuilder() {
-    }
-
-    /**
-     * Creates an AbstractStringBuilder of the specified capacity.
-     */
-    AbstractStringBuilder(int capacity) {
-       // 构造函数，创建数组对象
-        value = new char[capacity];
-    }
-
-    /**
-     * Returns the length (character count).
-     *
-     * @return  the length of the sequence of characters currently
-     *          represented by this object
-     */
-    public int length() {
-        return count;
-    }
-
-```
-从这些源码我们看到 他的数组和String的不一样，因为成员变量value数组没有被final修饰所以可以修改他的引用变量的值，即可以引用到新的数组对象。所以StringBuffer对象是可变的
-
-
-如果知道字符串的长度则创建对象的时候尽量指定大小
-
-- (1)在上面的源代码中我们看到StringBuffer 的构造函数默认创建的大小为16个字符。
-- (2)如果我们在创建对象的时候指定了大小则创建指定容量大小的数组对象
-  
-```
-// 调用父类的构造函数，创建数组对象
-  public StringBuffer(int capacity) {
-        super(capacity);
-    }
- /**
-     * Creates an AbstractStringBuilder of the specified capacity.
-     */
-    AbstractStringBuilder(int capacity) {
-     //按照指定容量创建字符数组   
-     value = new char[capacity];
-    }
-
-```
-
-- (3)如果在创建对象时构造函数的参数为字符串则 创建的数组的长度为字符长度+16字符
-这样的长度，然后再将这个字符串添加到字符数组中，添加的时候会判断原来字符数组中的个数加上这个字符串的长度是否大于这个字符数组的大小如果大于则进行扩容如果没有则添加，源码如下：
-
-
-```
- public StringBuffer(String str) {
-        super(str.length() + 16);
-        append(str);
-    }
-```
-append 出现在了这里刚好一起来看看 append方法的实现
-4、其实append方法就做两件事，如果 count （字符数组中已有字符的个数）加添加的字符串的长度小于 value.length 也就是小于字符数组的容量则直接将要添加的字符拷贝到数组在修改count就可以了。
-5、如果cout和添加的字符串的长度的和大于value.length  则会创建一个新字符数组 再将原有的字符拷贝到新字符数组，再将要添加的字符添加到字符数组中，再改变conut(字符数组中字符的个数)
-
-整个添加过程的源码如下：
-
-```
-public synchronized StringBuffer append(Object obj) {
-        super.append(String.valueOf(obj));
+  @Override
+    public StringBuilder append(CharSequence s) {
+        super.append(s);
         return this;
     }
 ```
+我们看到StringBuilder都是在调用父类的方法，而且通过继承关系，我们知道它是AbstractStringBuilder 的子类，那我们就继续查看它的父类，AbstractStringBuilder 实现了Appendable跟CharSequence 接口，所以它能够跟String相互转换
 
-调用父类的方法
-
+#### 成员变量
 ```
- public AbstractStringBuilder append(Object obj) {
-        return append(String.valueOf(obj));
+    char[] value;//字符数组
+    int count;//字符数量
+```
+
+#### 构造方法
+```
+	AbstractStringBuilder() {
+    }
+   AbstractStringBuilder(int capacity) {
+        value = new char[capacity];
     }
 ```
+可以看到AbstractStringBuilder只有两个构造方法，一个为空实现，还有一个为指定字符数组的容量，如果事先知道String的长度，并且这个长度小于16，那么就可以节省内存空间。他的数组和String的不一样，因为成员变量value数组没有被final修饰所以可以修改他的引用变量的值，即可以引用到新的数组对象。所以StringBuilder对象是可变的
 
-这个方法中调用了ensureCapacityInternal （）方法判断count(字符数组原有的字符个数)+str.length() 的长度是否大于value容量
+#### append方法
 
+![append方法](http://orbm62bsw.bkt.clouddn.com/append%E6%96%B9%E6%B3%95.png)
+通过图片可以看到，append有很多重载方法，其实原理都差不多，我们拿char举例子
 ```
-
-     * This method has the same contract as ensureCapacity, but is
-     * never synchronized.
-     */
+  @Override
+    public AbstractStringBuilder append(char c) {
+        ensureCapacityInternal(count + 1);//检测容量
+        value[count++] = c;
+        return this;
+    }
+    //判断当前字节数组的容量是否满足需求
     private void ensureCapacityInternal(int minimumCapacity) {
         // overflow-conscious code
         if (minimumCapacity - value.length > 0)
+        //目前所需容量超出value数组的容量，进行扩容
             expandCapacity(minimumCapacity);
     }
-```
-
-如果count+str.length() 长度大于value的容量 则调用方法进行扩容
-  
-```
-/**
-     * This implements the expansion semantics of ensureCapacity with no
-     * size check or synchronization.
-     */
+    //开始扩容
     void expandCapacity(int minimumCapacity) {
+    //将现有容量扩充至value数组的2倍多2
         int newCapacity = value.length * 2 + 2;
         if (newCapacity - minimumCapacity < 0)
+	      //如果扩容后的长度比需要的长度还小，则跟需要的长度进行交换
             newCapacity = minimumCapacity;
         if (newCapacity < 0) {
             if (minimumCapacity < 0) // overflow
                 throw new OutOfMemoryError();
             newCapacity = Integer.MAX_VALUE;
         }
+        //将数组扩容拷贝
         value = Arrays.copyOf(value, newCapacity);
+    }
+```
+#### insert方法
+
+![insert方法](http://orbm62bsw.bkt.clouddn.com/insert%E6%96%B9%E6%B3%95.png)
+> insert也有很多重载方法，下面同样以char为例
+```
+    public AbstractStringBuilder insert(int offset, char c) {
+	    //检测是否需要扩容
+        ensureCapacityInternal(count + 1);
+        //拷贝数组
+        System.arraycopy(value, offset, value, offset + 1, count - offset);
+        //进行赋值
+        value[offset] = c;
+        count += 1;
+        return this;
     }
 ```
 
 
-Arrays.copyOf（value,newCapacity） 复制指定的数组，截取或用 null 字符填充（如有必要），以使副本具有指定的长度。
-上面的getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin)   将字符从此字符串复制到目标字符数组dst中，第一个参数 第二个参数截取要添加字符串的长度，第三个为目标字符数组第四个为字符串要添加到数组的开始位置
-       
-到这里数组的赋值都结束了，修改count的值，整个append也就结束了。
+#### StringBuffer
+![StringBuilder继承关系](http://orbm62bsw.bkt.clouddn.com/StringBuffer%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
 
-#### StringBuilder
-![StringBuilder继承关系](http://orbm62bsw.bkt.clouddn.com/StringBuilder%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
-跟StringBuffer差不多，一个是线程安全，一个是非线程安全而已
+跟StringBuilder差不多，只不过在所有的方法上面加了一个同步锁而已，不再赘述。
+
+#### equals与==
+**equals方法**：由于String重新了Object的equas方法，所以只要两个String对象的值一样，那么就会返回true.
+**==**:这个比较的是内存地址，下面通过大量的代码示例，来验证一下刚才分析的源码
+
+创建方式| 对象个数| 引用指向
+:---|:---:|:---:
+String a="wustor" | 1| 常量池
+String b=new String("wustor") | 1| 堆内存
+String c=new String() | 1| 堆内存
+String d="wust"+"or" | 3| 常量池
+String e=a+b | 3| 堆内存
+
+
+
+
+#### 其他常用方法
+
+valueOf() 转换为字符串
+trim() 去掉起始和结尾的空格
+substring() 截取字符串
+indexOf() 查找字符或者子串第一次出现的地方
+toCharArray()转换成字符数组
+getBytes()获取字节数组
+charAt() 截取一个字符　
+length() 字符串的长度
+toLowerCase() 转换为小写
+
 
 ## 总结
 
-- 一旦string对象在内存(堆)中被创建出来，就无法被修改。
+
+- String被final修饰，一旦被创建，无法更改
 - String类的所有方法都没有改变字符串本身的值，都是返回了一个新的对象。
-- 如果你需要一个可修改的字符串，应该使用StringBuffer 或者 StringBuilder。
-- 否则会有大量时间浪费在垃圾回收上，因为每次试图修改都有新的string对象被创建出来。
+- 如果你需要一个可修改的字符串，应该使用StringBuilder或者 StringBuffer。
 - 如果你只需要创建一个字符串，你可以使用双引号的方式，如果你需要在堆中创建一个新的对象，你可以选择构造函数的方式。
-- StringBuffer 类被final 修饰所以不能继承没有子类
-- StringBuffer 对象是可变对象，因为父类的 value [] char 没有被final修饰所以可以进行引用的改变，而且还提供了方法可以修改被引用对象的内容即修改了数组内容。
-- 在使用StringBuffer对象的时候尽量指定大小这样会减少扩容的次数，也就是会减少创建字符数组对象的次数和数据复制的次数，当然效率也会提升。
-- StringBuilder 和StringBuffer 很像只是不是线程安全的其他的很像所以不罗嗦了。
+- 在使用StringBuilder时尽量指定大小这样会减少扩容的次数，有助于提升效率。
