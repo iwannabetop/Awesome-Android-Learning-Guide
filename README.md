@@ -40,8 +40,8 @@
 # 内容
 
 
-- [Java 部分](java/README.md) （编辑、发布中）
-- [数据结构与算法](datastruct/README.md) （即将开始学习）
+- [Java 部分](java/README.md) （部分文章未完成编辑，需要多努力）
+- [数据结构与算法](datastruct/README.md) （分工完成、即将开始学习）
 - 并发编程(内容构思中，欢迎补充）
 - 网络编程
 - Java 虚拟机
