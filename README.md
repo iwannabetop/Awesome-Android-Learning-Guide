@@ -41,8 +41,8 @@
 
 
 - [Java 部分](java/README.md) （编辑、发布中）
-- [数据结构与算法](datastruct/README.md) （内容构思中，欢迎补充）
-- 并发编程
+- [数据结构与算法](datastruct/README.md) （即将开始学习）
+- 并发编程(内容构思中，欢迎补充）
 - 网络编程
 - Java 虚拟机
 - 设计模式
@@ -55,18 +55,18 @@
 
 | 排名 | 昵称 | 介绍 |文章数量 | 审核数量 | 最近活跃时间 |
 | --- | --- | --- | --- |--- | --- |
-| 1 | [shixinzhang](https://github.com/shixinzhang) | 努力变更强 | 1 | 5 | 2017/11/30 |
-| 2 | [wustor](https://github.com/wustor) | 做一个很酷的APP | 2 | 1 | 2017/11/30 |
-| 3 | [YangZhe](https://github.com/StudyLifeTime) | 专攻音视频 | 0 | 3 | 2017/11/30 |
-| 4 | [Struggle_li](https://github.com/LiPingStruggle) | 通往架构师的路上 | 1 | 3 | 2017/11/30 |
-| 5 | [Milo](https://github.com/hzmeibi) | 敢冲才不枉青春 | 1 | 1 | 2017/11/30 |
-| 6 | [Alex_Zhao](https://github.com/zgh0711)| 努力做一个更有价值的人 | 1 | 1 | 2017/11/30 |
-| 7 | [Hongleizhang](https://github.com/RayCourant)| 愿勤奋成为习惯 | 1 | 1 | 2017/11/30 |
-| 8 | [justdoitJX](https://github.com/justdoitJX) | 梦为努力浇了水 | 1 | 1 | 2017/11/30 |
-| 9 | [rookieyang](https://github.com/firstdream10) | 永远相信美好的事情即将发生 | 1 | 0 | 2017/11/30 |
-| 10 | [麦田哥](https://github.com/wheat7)| 欢迎你到大理玩  | 1 | 1 | 2017/11/30 |
-| 11 | [Anonymous](https://github.com/diamondlin2016) |  gay 里 gay 气的美男子| 1 | 0 | 2017/11/30 |
-| 12 | [Cloud](https://github.com/cloud9527) | 运动健将 | 1 | 0 | 2017/11/30 |
+| 1 | [shixinzhang](https://github.com/shixinzhang) | 努力变更强 | 1 | 5 | 2018/04/06 |
+| 2 | [wustor](https://github.com/wustor) | 做一个很酷的APP | 2 | 1 | 2018/04/06 |
+| 3 | [YangZhe](https://github.com/StudyLifeTime) | 专攻音视频 | 0 | 3 | 2018/04/06 |
+| 4 | [Struggle_li](https://github.com/LiPingStruggle) | 通往架构师的路上 | 1 | 3 | 2018/04/06 |
+| 5 | [Milo](https://github.com/hzmeibi) | 敢冲才不枉青春 | 1 | 1 | 2018/04/06 |
+| 6 | [Alex_Zhao](https://github.com/zgh0711)| 努力做一个更有价值的人 | 1 | 1 | 2018/04/06 |
+| 7 | [Hongleizhang](https://github.com/RayCourant)| 愿勤奋成为习惯 | 1 | 1 | 2018/04/06 |
+| 8 | [justdoitJX](https://github.com/justdoitJX) | 梦为努力浇了水 | 1 | 1 | 2018/04/06 |
+| 9 | [rookieyang](https://github.com/firstdream10) | 永远相信美好的事情即将发生 | 1 | 0 |2018/04/06 |
+| 10 | [麦田哥](https://github.com/wheat7)| 欢迎你到大理玩  | 1 | 1 | 2018/04/06 |
+| 11 | [Anonymous](https://github.com/diamondlin2016) |  gay 里 gay 气的美男子| 1 | 0 | 2018/04/06 |
+| 12 | [Cloud](https://github.com/cloud9527) | 运动健将 | 1 | 0 | 2018/04/06 |
 
 
 # 如何参与
