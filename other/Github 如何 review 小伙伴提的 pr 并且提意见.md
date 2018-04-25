@@ -34,7 +34,7 @@ Files changed 表示这次提交修改了几个文件。
 
 3.看到哪里就有问题就在对应的地方留言
 
-> 留言次数没用限制。
+> 留言次数没有限制。
 
 ![](http://ww1.sinaimg.cn/large/b1aad299gy1fktbmebmzpj20ua0ken2j.jpg)
 
