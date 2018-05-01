@@ -67,7 +67,7 @@
  - 知北游负责
 3. 栈（使用场景及 2 个栈实现队列）
  - Alex_赵
-4. 队列（ 使用场景、2 个队列实现栈）
+4. [队列（ 使用场景、2 个队列实现栈）](https://github.com/iwannabetop/Awesome-Android-Learning-Guide/blob/master/datastruct/queue/%E9%98%9F%E5%88%97-Milo.md)
  - Milo
 5. 汉诺塔的代码实现
 6. 二叉树的实现、遍历和查找，使用场景
